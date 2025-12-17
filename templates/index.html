@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title> DNS and Port Scanner </title>
+    <style>
+        body {
+            background:#0f172a;
+            color:#e5e7eb;
+            font-family:Arial;
+            padding:40px;
+        }
+        h2,h3 { color:#38bdf8; }
+        button {
+            padding:10px;
+            background:#22c55e;
+            border:none;
+            cursor:pointer;
+            margin-top:10px;
+        }
+        input { padding:10px; }
+        .box {
+            background:#020617;
+            padding:15px;
+            margin-top:10px;
+            border-radius:6px;
+            max-height:300px;
+            overflow:auto;
+        }
+        pre { margin:0; white-space:pre-wrap; }
+    </style>
+</head>
+<body>
+
+<h2> Automate Recon Scanner </h2>
+
+<form method="POST">
+    <input name="domain" value="{{ domain }}" placeholder="example.com" required>
+    <button type="submit">Enumerate</button>
+</form>
+
+{% if all_subs %}
+
+<h3> All Subdomains </h3>
+<div class="box"><pre>{% for s in all_subs %}{{ s }}
+{% endfor %}</pre></div>
+
+<h3> Active Subdomains </h3>
+<div class="box"><pre>{% for s in active_subs %}{{ s }}
+{% endfor %}</pre></div>
+
+<h3> IP Addresses </h3>
+<div class="box">
+<pre>
+{% for sub, ips in ip_map.items() %}
+{{ sub }}
+{% for ip in ips %}
+  └─ {{ ip }}
+{% endfor %}
+
+{% endfor %}
+</pre>
+</div>
+
+<button onclick="startScan()">Start FULL Port Scan</button>
+
+<h3> Open Ports </h3>
+<div class="box">
+<pre id="ports">Waiting…</pre>
+</div>
+
+<script>
+const ALL_IPS = JSON.parse('{{ all_ips | tojson | default("[]") }}');
+
+function startScan() {
+    if (ALL_IPS.length === 0) {
+        document.getElementById("ports").innerText = "No IPs to scan";
+        return;
+    }
+
+    fetch("/start-port-scan", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ ips: ALL_IPS })
+    });
+
+    poll();
+}
+
+function poll() {
+    fetch("/port-status")
+    .then(r => r.json())
+    .then(data => {
+        let out = "";
+        for (let ip in data.ports) {
+            const ports = data.ports[ip];
+
+            if (ports.length > 0) {
+                out += ip + " → " + ports.join(", ") + "\n";
+            } else {
+                out += ip + " → No open ports\n";
+            }
+        }
+
+        document.getElementById("ports").innerText =
+            out || (data.running ? "Scanning…" : "Done");
+
+        if (!data.done) {
+            setTimeout(poll, 3000);
+        }
+    });
+}
+</script>
+
+{% endif %}
+
+</body>
+</html>

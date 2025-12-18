@@ -48,17 +48,21 @@
 <div class="box"><pre>{% for s in active_subs %}{{ s }}
 {% endfor %}</pre></div>
 
-<h3> IP Addresses </h3>
-<div class="box">
-<pre>
-{% for sub, ips in ip_map.items() %}
-{{ sub }}
-{% for ip in ips %}
-  └─ {{ ip }}
-{% endfor %}
+<h3> IP Addresses (Select to Scan) </h3>
 
+<div class="box">
+<form id="ipForm">
+{% for sub, ips in ip_map.items() %}
+<strong>{{ sub }}</strong><br>
+{% for ip in ips %}
+  <label>
+    <input type="checkbox" name="ips" value="{{ ip }}" checked>
+    {{ ip }}
+  </label><br>
 {% endfor %}
-</pre>
+<br>
+{% endfor %}
+</form>
 </div>
 
 <button onclick="startScan()">Start FULL Port Scan</button>

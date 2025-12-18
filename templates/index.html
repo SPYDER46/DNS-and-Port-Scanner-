@@ -4,114 +4,178 @@
     <title>DNS and Port Scanner</title>
 
 <style>
+    :root {
+        --bg-page:#f4f6f8;
+        --bg-panel:#ffffff;
+        --border:#e5e7eb;
+        --primary:#2563eb;
+        --success:#16a34a;
+        --danger:#dc2626;
+        --text-main:#0f172a;
+        --text-muted:#6b7280;
+    }
+
     body {
-        background:#0b1220;
-        color:#e5e7eb;
-        font-family: "Segoe UI", Arial, sans-serif;
-        padding:30px;
+        margin:0;
+        min-height:100vh;
+        background:var(--bg-page);
+        color:var(--text-main);
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        padding:24px;
+    }
+
+    /* ===== PAGE WRAP FEEL ===== */
+    body::before {
+        content:"";
+        position:fixed;
+        inset:0;
+        background:var(--bg-page);
+        z-index:-1;
     }
 
     h2 {
-        color:#38bdf8;
         text-align:center;
-        margin-bottom:8px;
-        letter-spacing:0.4px;
+        font-size:22px;
+        margin-bottom:18px;
+        color:var(--text-main);
     }
 
     h3 {
-        color:#7dd3fc;
+        margin-top:32px;
+        font-size:14px;
+        font-weight:600;
+        color:#1f2937;
         display:flex;
         align-items:center;
         gap:8px;
-        margin-top:26px;
-        font-size:16px;
-        border-bottom:1px solid #1e293b;
         padding-bottom:6px;
+        border-bottom:1px solid var(--border);
     }
 
-    button {
-        padding:10px 18px;
-        border:none;
-        cursor:pointer;
-        border-radius:8px;
-        font-weight:600;
-        font-size:14px;
-        background:#22c55e;
-        color:#022c22;
-    }
-
-    /* Stop button */
-    button[type="button"] {
-        background:#ef4444;
-        color:#ffffff;
-    }
-
-    button:disabled {
-        background:#475569;
-        cursor:not-allowed;
-    }
-
-    input {
-        padding:10px 14px;
-        border-radius:8px;
-        border:1px solid #1e293b;
-        background:#020617;
-        color:#e5e7eb;
-        font-size:14px;
-        min-width:240px;
-        outline:none;
-    }
-
+    /* ===== TOP FORM ===== */
     .top-center {
+        max-width:1200px;
+        margin:0 auto 30px auto;
         display:flex;
         flex-direction:column;
         align-items:center;
-        gap:14px;
-        margin-bottom:32px;
+        gap:16px;
     }
 
     .top-center form {
         display:flex;
         gap:10px;
         flex-wrap:wrap;
-        justify-content:center;
+        background:var(--bg-panel);
+        padding:16px;
+        border-radius:8px;
+        border:1px solid var(--border);
+    }
+
+    input {
+        padding:9px 12px;
+        border-radius:6px;
+        border:1px solid var(--border);
+        background:#ffffff;
+        color:var(--text-main);
+        font-size:13px;
+        /* min-width:240px; */
+        outline:none;
+    }
+
+    input::placeholder {
+        color:#9ca3af;
+    }
+
+    /* ===== BUTTONS ===== */
+    button {
+        padding:9px 16px;
+        border-radius:6px;
+        border:1px solid transparent;
+        font-size:13px;
+        font-weight:600;
+        cursor:pointer;
+        background:var(--success);
+        color:#ffffff;
+    }
+
+    button[type="button"] {
+        background:var(--danger);
+    }
+
+    button:disabled {
+        background:#9ca3af;
+        cursor:not-allowed;
+    }
+
+    /* ===== CONTENT AREA ===== */
+    h3,
+    .box,
+    #portScanBtn {
+        max-width:1200px;
+        margin-left:auto;
+        margin-right:auto;
     }
 
     .box {
-        background:#020617;
-        padding:16px;
+        background:var(--bg-panel);
+        border:1px solid var(--border);
+        border-radius:8px;
+        padding:14px;
         margin-top:10px;
-        border-radius:10px;
-        max-height:300px;
+        max-height:280px;
         overflow:auto;
-        font-size:13px;
-        border:1px solid #1e293b;
+        font-size:12px;
     }
 
     pre {
         margin:0;
         white-space:pre-wrap;
-        line-height:1.5;
+        line-height:1.45;
+        font-family: Consolas, Monaco, monospace;
+        color:#111827;
+    }
+
+    strong {
+        font-weight:600;
+        color:#111827;
     }
 
     label {
         display:flex;
         align-items:center;
         gap:8px;
+        font-size:12px;
         padding:4px 0;
-        font-size:13px;
         cursor:pointer;
     }
 
     input[type="checkbox"] {
-        accent-color:#38bdf8;
+        accent-color:var(--primary);
     }
 
+    .muted {
+        color:var(--text-muted);
+        font-size:12px;
+    }
+
+    /* ===== PORT SCAN BUTTON ===== */
+    #portScanBtn {
+        display:block;
+        margin:32px auto 10px auto;
+    }
+
+    #ports {
+        color:#1d4ed8;
+        font-weight:500;
+    }
+
+    /* ===== LOADER ===== */
     .loader {
-        width:14px;
-        height:14px;
-        border:3px solid #1e293b;
-        border-top:3px solid #38bdf8;
+        width:12px;
+        height:12px;
+        border:2px solid #d1d5db;
+        border-top:2px solid var(--primary);
         border-radius:50%;
         animation:spin 1s linear infinite;
     }
@@ -121,29 +185,28 @@
         100% { transform:rotate(360deg); }
     }
 
-    .muted {
-        color:#94a3b8;
-        font-size:13px;
-        margin-top:4px;
-    }
-
-    #ports {
-        color:#a5f3fc;
-        font-weight:500;
-    }
-
-    /* Clean scrollbar */
+    /* ===== SCROLLBAR ===== */
     .box::-webkit-scrollbar {
         width:6px;
     }
 
     .box::-webkit-scrollbar-thumb {
-        background:#334155;
+        background:#cbd5e1;
         border-radius:4px;
     }
 
     .box::-webkit-scrollbar-track {
-        background:#020617;
+        background:#f9fafb;
+    }
+
+    /* ===== MOBILE ===== */
+    @media (max-width:600px) {
+        input {
+            min-width:100%;
+        }
+        .top-center form {
+            width:100%;
+        }
     }
 </style>
 
@@ -153,7 +216,7 @@
 <body>
 
 <div class="top-center">
-    <h2>Automate Recon Scanner</h2>
+    <h2> BUG FREE - RECON SCANNER </h2>
 
     <form method="POST" onsubmit="disableEnumBtn()">
         <input id="domainInput" name="domain" value="{{ domain }}" placeholder="example.com" required>

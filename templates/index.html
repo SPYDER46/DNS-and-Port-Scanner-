@@ -3,82 +3,151 @@
 <head>
     <title>DNS and Port Scanner</title>
 
-    <style>
-        body {
-            background:#0f172a;
-            color:#e5e7eb;
-            font-family:Arial;
-            padding:40px;
-        }
+<style>
+    body {
+        background:#0b1220;
+        color:#e5e7eb;
+        font-family: "Segoe UI", Arial, sans-serif;
+        padding:30px;
+    }
 
-        h2 { color:#38bdf8; text-align:center; }
+    h2 {
+        color:#38bdf8;
+        text-align:center;
+        margin-bottom:8px;
+        letter-spacing:0.4px;
+    }
 
-        h3 {
-            color:#38bdf8;
-            display:flex;
-            align-items:center;
-            gap:8px;
-        }
+    h3 {
+        color:#7dd3fc;
+        display:flex;
+        align-items:center;
+        gap:8px;
+        margin-top:26px;
+        font-size:16px;
+        border-bottom:1px solid #1e293b;
+        padding-bottom:6px;
+    }
 
-        button {
-            padding:10px 16px;
-            background:#22c55e;
-            border:none;
-            cursor:pointer;
-            border-radius:6px;
-            font-weight:bold;
-        }
+    button {
+        padding:10px 18px;
+        border:none;
+        cursor:pointer;
+        border-radius:8px;
+        font-weight:600;
+        font-size:14px;
+        background:#22c55e;
+        color:#022c22;
+    }
 
-        button:disabled {
-            background:#475569;
-            cursor:not-allowed;
-        }
+    /* Stop button */
+    button[type="button"] {
+        background:#ef4444;
+        color:#ffffff;
+    }
 
-        input {
-            padding:10px;
-            border-radius:6px;
-            border:none;
-        }
+    button:disabled {
+        background:#475569;
+        cursor:not-allowed;
+    }
 
-        .top-center {
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            gap:15px;
-            margin-bottom:30px;
-        }
+    input {
+        padding:10px 14px;
+        border-radius:8px;
+        border:1px solid #1e293b;
+        background:#020617;
+        color:#e5e7eb;
+        font-size:14px;
+        min-width:240px;
+        outline:none;
+    }
 
-        .box {
-            background:#020617;
-            padding:15px;
-            margin-top:10px;
-            border-radius:6px;
-            max-height:300px;
-            overflow:auto;
-            font-size:14px;
-        }
+    .top-center {
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        gap:14px;
+        margin-bottom:32px;
+    }
 
-        pre { margin:0; white-space:pre-wrap; }
+    .top-center form {
+        display:flex;
+        gap:10px;
+        flex-wrap:wrap;
+        justify-content:center;
+    }
 
-        .loader {
-            width:14px;
-            height:14px;
-            border:3px solid #1e293b;
-            border-top:3px solid #38bdf8;
-            border-radius:50%;
-            animation:spin 1s linear infinite;
-        }
+    .box {
+        background:#020617;
+        padding:16px;
+        margin-top:10px;
+        border-radius:10px;
+        max-height:300px;
+        overflow:auto;
+        font-size:13px;
+        border:1px solid #1e293b;
+    }
 
-        @keyframes spin {
-            0% { transform:rotate(0deg); }
-            100% { transform:rotate(360deg); }
-        }
+    pre {
+        margin:0;
+        white-space:pre-wrap;
+        line-height:1.5;
+    }
 
-        .muted {
-            color:#64748b;
-            font-size:13px;
-        }
-    </style>
+    label {
+        display:flex;
+        align-items:center;
+        gap:8px;
+        padding:4px 0;
+        font-size:13px;
+        cursor:pointer;
+    }
+
+    input[type="checkbox"] {
+        accent-color:#38bdf8;
+    }
+
+    .loader {
+        width:14px;
+        height:14px;
+        border:3px solid #1e293b;
+        border-top:3px solid #38bdf8;
+        border-radius:50%;
+        animation:spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform:rotate(0deg); }
+        100% { transform:rotate(360deg); }
+    }
+
+    .muted {
+        color:#94a3b8;
+        font-size:13px;
+        margin-top:4px;
+    }
+
+    #ports {
+        color:#a5f3fc;
+        font-weight:500;
+    }
+
+    /* Clean scrollbar */
+    .box::-webkit-scrollbar {
+        width:6px;
+    }
+
+    .box::-webkit-scrollbar-thumb {
+        background:#334155;
+        border-radius:4px;
+    }
+
+    .box::-webkit-scrollbar-track {
+        background:#020617;
+    }
+</style>
+
+
 </head>
 
 <body>

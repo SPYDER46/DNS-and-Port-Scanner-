@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title> DNS and Port Scanner </title>
+    <title>DNS and Port Scanner</title>
+
     <style>
         body {
             background:#0f172a;
@@ -9,15 +10,25 @@
             font-family:Arial;
             padding:40px;
         }
+
         h2,h3 { color:#38bdf8; }
+
         button {
             padding:10px;
             background:#22c55e;
             border:none;
             cursor:pointer;
             margin-top:10px;
+            border-radius:6px;
+            font-weight:bold;
         }
-        input { padding:10px; }
+
+        input {
+            padding:10px;
+            border-radius:6px;
+            border:none;
+        }
+
         .box {
             background:#020617;
             padding:15px;
@@ -26,92 +37,130 @@
             max-height:300px;
             overflow:auto;
         }
+
         pre { margin:0; white-space:pre-wrap; }
+
+        .top-center {
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            margin-top:30px;
+            gap:15px;
+        }
+
+        .scan-form {
+            display:flex;
+            gap:10px;
+        }
+
+        label {
+            cursor:pointer;
+        }
     </style>
 </head>
+
 <body>
 
-<h2> Automate Recon Scanner </h2>
+<!-- ================= HEADER ================= -->
+<div class="top-center">
+    <h2>Automate Recon Scanner</h2>
 
-<form method="POST">
-    <input name="domain" value="{{ domain }}" placeholder="example.com" required>
-    <button type="submit">Enumerate</button>
-</form>
+    <form method="POST" class="scan-form">
+        <input name="domain" value="{{ domain }}" placeholder="example.com" required>
+        <button type="submit">Enumerate</button>
+    </form>
+</div>
 
 {% if all_subs %}
 
-<h3> All Subdomains </h3>
-<div class="box"><pre>{% for s in all_subs %}{{ s }}
-{% endfor %}</pre></div>
+<!-- ================= SUBDOMAINS ================= -->
+<h3>All Subdomains</h3>
+<div class="box">
+<pre>{% for s in all_subs %}{{ s }}
+{% endfor %}</pre>
+</div>
 
-<h3> Active Subdomains </h3>
-<div class="box"><pre>{% for s in active_subs %}{{ s }}
-{% endfor %}</pre></div>
+<h3>Active Subdomains</h3>
+<div class="box">
+<pre>{% for s in active_subs %}{{ s }}
+{% endfor %}</pre>
+</div>
 
-<h3> IP Addresses (Select to Scan) </h3>
+<!-- ================= IP SELECTION ================= -->
+<h3>IP Addresses (Select to Scan)</h3>
 
 <div class="box">
 <form id="ipForm">
 {% for sub, ips in ip_map.items() %}
 <strong>{{ sub }}</strong><br>
 {% for ip in ips %}
-  <label>
+<label>
     <input type="checkbox" name="ips" value="{{ ip }}" checked>
     {{ ip }}
-  </label><br>
+</label><br>
 {% endfor %}
 <br>
 {% endfor %}
 </form>
 </div>
 
-<button onclick="startScan()">Start FULL Port Scan</button>
+<button onclick="startScan()">Port Scan</button>
 
-<h3> Open Ports </h3>
+<!-- ================= PORT RESULTS ================= -->
+<h3>Open Ports</h3>
 <div class="box">
 <pre id="ports">Waiting…</pre>
 </div>
 
 <script>
-const ALL_IPS = JSON.parse('{{ all_ips | tojson | default("[]") }}');
+/* ================= GET SELECTED IPS ================= */
+function getSelectedIPs() {
+    return Array.from(
+        document.querySelectorAll('#ipForm input[type="checkbox"]:checked')
+    ).map(cb => cb.value);
+}
 
+/* ================= START SCAN ================= */
 function startScan() {
-    if (ALL_IPS.length === 0) {
-        document.getElementById("ports").innerText = "No IPs to scan";
+    const ips = getSelectedIPs();
+
+    if (ips.length === 0) {
+        document.getElementById("ports").innerText =
+            "No IPs selected for scanning";
         return;
     }
 
+    document.getElementById("ports").innerText = "Starting scan…";
+
     fetch("/start-port-scan", {
         method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ ips: ALL_IPS })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ips: ips })
     });
 
     poll();
 }
 
+/* ================= POLL RESULTS ================= */
 function poll() {
     fetch("/port-status")
-    .then(r => r.json())
-    .then(data => {
-        let out = "";
-        for (let ip in data.ports) {
-            const ports = data.ports[ip];
+        .then(r => r.json())
+        .then(data => {
+            let out = "";
 
-            if (ports.length > 0) {
-                out += ip + " → " + ports.join(", ") + "\n";
-            } else {
-                out += ip + " → No open ports\n";
+            for (let ip in data.ports) {
+                const ports = data.ports[ip];
+                out += ip + " → " +
+                    (ports.length ? ports.join(", ") : "No open ports") + "\n";
             }
-        }
 
-        document.getElementById("ports").innerText =
-            out || (data.running ? "Scanning…" : "Done");
+            document.getElementById("ports").innerText =
+                out || (data.running ? "Scanning…" : "Done");
 
-        if (!data.done) {
-            setTimeout(poll, 3000);
-        }
-    });
+            if (!data.done) {
+                setTimeout(poll, 3000);
+            }
+        });
 }
 </script>
 

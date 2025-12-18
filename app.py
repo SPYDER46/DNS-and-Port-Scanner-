@@ -157,6 +157,7 @@ def start_port_scan():
 @app.route("/port-status")
 def port_status():
     return jsonify(SCAN_STATE)
+    
 
 
 if __name__ == "__main__":

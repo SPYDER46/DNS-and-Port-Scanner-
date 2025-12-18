@@ -38,7 +38,6 @@
             padding:10px;
             border-radius:6px;
             border:none;
-            /* width:260px; */
         }
 
         .top-center {
@@ -84,17 +83,16 @@
 
 <body>
 
-<!-- ================= HEADER ================= -->
 <div class="top-center">
     <h2>Automate Recon Scanner</h2>
 
     <form method="POST" onsubmit="disableEnumBtn()">
         <input id="domainInput" name="domain" value="{{ domain }}" placeholder="example.com" required>
         <button id="enumBtn" type="submit">Enumerate DNS</button>
+        <button type="button" onclick="stopAll()">Stop</button>
     </form>
 </div>
 
-<!-- ================= ALL SUBDOMAINS ================= -->
 <h3>
     All Subdomains
     {% if not all_subs %}<span class="loader"></span>{% endif %}
@@ -109,7 +107,6 @@
 {% endif %}
 </div>
 
-<!-- ================= ACTIVE SUBDOMAINS ================= -->
 <h3>
     Active Subdomains
     {% if not active_subs %}<span class="loader"></span>{% endif %}
@@ -124,7 +121,6 @@
 {% endif %}
 </div>
 
-<!-- ================= IP ADDRESSES ================= -->
 <h3>
     IP Addresses (Select IP to Scan)
     {% if not ip_map %}<span class="loader"></span>{% endif %}
@@ -149,7 +145,6 @@
 {% endif %}
 </div>
 
-<!-- ================= PORT SCAN ================= -->
 <button id="portScanBtn" onclick="startScan()">Port Scan</button>
 
 <h3>
@@ -162,9 +157,27 @@
 </div>
 
 <script>
-/* Disable Enumerate button on submit */
+/* ===== FLAGS (ADDED) ===== */
+let enumRunning = false;
+let portRunning = false;
+let stopPolling = false;
+
+/* Disable Enumerate button */
 function disableEnumBtn() {
+    enumRunning = true;
     document.getElementById("enumBtn").disabled = true;
+
+    /* ✅ RESET stopped text when new enumeration starts */
+    document.querySelectorAll('.muted')
+        .forEach(m => {
+            if (m.innerText === 'Stopped by user') {
+                m.innerText = 'Waiting for subdomain enumeration…';
+            }
+        });
+
+    /* Show loaders again */
+    document.querySelectorAll('.loader')
+        .forEach(l => l.style.display = 'inline-block');
 }
 
 /* Get selected IPs */
@@ -182,7 +195,9 @@ function startScan() {
         return;
     }
 
-    /* 🔒 Disable input, buttons, checkboxes */
+    portRunning = true;
+    stopPolling = false;
+
     document.getElementById("domainInput").disabled = true;
     document.getElementById("enumBtn").disabled = true;
     document.getElementById("portScanBtn").disabled = true;
@@ -202,6 +217,8 @@ function startScan() {
 
 /* Poll scan status */
 function poll() {
+    if (stopPolling) return;
+
     fetch("/port-status")
         .then(r => r.json())
         .then(data => {
@@ -219,35 +236,70 @@ function poll() {
             if (!data.done) {
                 setTimeout(poll, 3000);
             } else {
-          
-                /* 🔓 Re-enable everything after scan */
-                    document.getElementById("domainInput").disabled = false;
-                    document.getElementById("enumBtn").disabled = false;
-                    document.getElementById("portScanBtn").disabled = false;
-                    enableIPCheckboxes();
+                portRunning = false;
 
-                    document.getElementById("portLoader").style.display = "none";
+                document.getElementById("domainInput").disabled = false;
+                document.getElementById("enumBtn").disabled = false;
+                document.getElementById("portScanBtn").disabled = false;
+                enableIPCheckboxes();
+                document.getElementById("portLoader").style.display = "none";
             }
         });
 }
 
-/* Prevent POST resubmission on refresh */
-if (window.history.replaceState) {
-    window.history.replaceState(null, null, window.location.href);
+/* ===== SINGLE STOP BUTTON ===== */
+function stopAll() {
+     window.stop();
+    /* Stop enumeration UI */
+    if (enumRunning) {
+        enumRunning = false;
+        document.getElementById("domainInput").disabled = false;
+        document.getElementById("enumBtn").disabled = false;
+
+        document.querySelectorAll('.loader')
+            .forEach(l => l.style.display = 'none');
+
+        document.querySelectorAll('.muted')
+            .forEach(m => {
+                if (
+                    m.innerText.includes('Waiting') ||
+                    m.innerText.includes('Resolving')
+                ) {
+                    m.innerText = 'Stopped by user';
+                }
+            });
+    }
+
+    /* Stop port scan UI */
+    if (portRunning) {
+        stopPolling = true;
+        portRunning = false;
+
+        document.getElementById("ports").innerText = "Scan stopped by user";
+        document.getElementById("portLoader").style.display = "none";
+
+        document.getElementById("domainInput").disabled = false;
+        document.getElementById("enumBtn").disabled = false;
+        document.getElementById("portScanBtn").disabled = false;
+        enableIPCheckboxes();
+    }
 }
 
+/* Helpers */
 function disableIPCheckboxes() {
-    document
-        .querySelectorAll('#ipForm input[type="checkbox"]')
+    document.querySelectorAll('#ipForm input[type="checkbox"]')
         .forEach(cb => cb.disabled = true);
 }
 
 function enableIPCheckboxes() {
-    document
-        .querySelectorAll('#ipForm input[type="checkbox"]')
+    document.querySelectorAll('#ipForm input[type="checkbox"]')
         .forEach(cb => cb.disabled = false);
-} 
+}
 
+/* Prevent POST resubmission */
+if (window.history.replaceState) {
+    window.history.replaceState(null, null, window.location.href);
+}
 </script>
 
 </body>

@@ -67,9 +67,9 @@ def nmap_scan(ip):
     try:
         cmd = [
             "nmap",
-            "-p1-6000",          # scan ports 1–6000
-            "-sS",               # SYN scan (fast)
-            "-T4",               # aggressive timing
+            "-p1-6000",          
+            "-sS",               
+            "-T4",               
             "--min-rate", "3000",
             "--open",
             ip
@@ -118,7 +118,7 @@ def index():
     all_ips = []
 
     if request.method == "POST":
-        domain = request.form["domain"]
+        domain = request.form.get("domain", "")
         all_subs = run_sublist3r(domain)
 
         ip_set = set()

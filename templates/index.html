@@ -11,22 +11,42 @@
             padding:40px;
         }
 
-        h2,h3 { color:#38bdf8; }
+        h2 { color:#38bdf8; text-align:center; }
+
+        h3 {
+            color:#38bdf8;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
 
         button {
-            padding:10px;
+            padding:10px 16px;
             background:#22c55e;
             border:none;
             cursor:pointer;
-            margin-top:10px;
             border-radius:6px;
             font-weight:bold;
+        }
+
+        button:disabled {
+            background:#475569;
+            cursor:not-allowed;
         }
 
         input {
             padding:10px;
             border-radius:6px;
             border:none;
+            /* width:260px; */
+        }
+
+        .top-center {
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            gap:15px;
+            margin-bottom:30px;
         }
 
         .box {
@@ -36,25 +56,28 @@
             border-radius:6px;
             max-height:300px;
             overflow:auto;
+            font-size:14px;
         }
 
         pre { margin:0; white-space:pre-wrap; }
 
-        .top-center {
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            margin-top:30px;
-            gap:15px;
+        .loader {
+            width:14px;
+            height:14px;
+            border:3px solid #1e293b;
+            border-top:3px solid #38bdf8;
+            border-radius:50%;
+            animation:spin 1s linear infinite;
         }
 
-        .scan-form {
-            display:flex;
-            gap:10px;
+        @keyframes spin {
+            0% { transform:rotate(0deg); }
+            100% { transform:rotate(360deg); }
         }
 
-        label {
-            cursor:pointer;
+        .muted {
+            color:#64748b;
+            font-size:13px;
         }
     </style>
 </head>
@@ -65,83 +88,119 @@
 <div class="top-center">
     <h2>Automate Recon Scanner</h2>
 
-    <form method="POST" class="scan-form">
-        <input name="domain" value="{{ domain }}" placeholder="example.com" required>
-        <button type="submit">Enumerate</button>
+    <form method="POST" onsubmit="disableEnumBtn()">
+        <input id="domainInput" name="domain" value="{{ domain }}" placeholder="example.com" required>
+        <button id="enumBtn" type="submit">Enumerate DNS</button>
     </form>
 </div>
 
-{% if all_subs %}
+<!-- ================= ALL SUBDOMAINS ================= -->
+<h3>
+    All Subdomains
+    {% if not all_subs %}<span class="loader"></span>{% endif %}
+</h3>
 
-<!-- ================= SUBDOMAINS ================= -->
-<h3>All Subdomains</h3>
 <div class="box">
+{% if all_subs %}
 <pre>{% for s in all_subs %}{{ s }}
 {% endfor %}</pre>
+{% else %}
+<div class="muted">Waiting for subdomain enumeration…</div>
+{% endif %}
 </div>
 
-<h3>Active Subdomains</h3>
+<!-- ================= ACTIVE SUBDOMAINS ================= -->
+<h3>
+    Active Subdomains
+    {% if not active_subs %}<span class="loader"></span>{% endif %}
+</h3>
+
 <div class="box">
+{% if active_subs %}
 <pre>{% for s in active_subs %}{{ s }}
 {% endfor %}</pre>
+{% else %}
+<div class="muted">Resolving DNS records…</div>
+{% endif %}
 </div>
 
-<!-- ================= IP SELECTION ================= -->
-<h3>IP Addresses (Select to Scan)</h3>
+<!-- ================= IP ADDRESSES ================= -->
+<h3>
+    IP Addresses (Select IP to Scan)
+    {% if not ip_map %}<span class="loader"></span>{% endif %}
+</h3>
 
 <div class="box">
+{% if ip_map %}
 <form id="ipForm">
 {% for sub, ips in ip_map.items() %}
 <strong>{{ sub }}</strong><br>
 {% for ip in ips %}
 <label>
-    <input type="checkbox" name="ips" value="{{ ip }}" checked>
+    <input type="checkbox" value="{{ ip }}" checked>
     {{ ip }}
 </label><br>
 {% endfor %}
 <br>
 {% endfor %}
 </form>
+{% else %}
+<div class="muted">Extracting IP addresses…</div>
+{% endif %}
 </div>
 
-<button onclick="startScan()">Port Scan</button>
+<!-- ================= PORT SCAN ================= -->
+<button id="portScanBtn" onclick="startScan()">Port Scan</button>
 
-<!-- ================= PORT RESULTS ================= -->
-<h3>Open Ports</h3>
+<h3>
+    Open Ports
+    <span id="portLoader" class="loader" style="display:none;"></span>
+</h3>
+
 <div class="box">
-<pre id="ports">Waiting…</pre>
+    <pre id="ports">Waiting…</pre>
 </div>
 
 <script>
-/* ================= GET SELECTED IPS ================= */
+/* Disable Enumerate button on submit */
+function disableEnumBtn() {
+    document.getElementById("enumBtn").disabled = true;
+}
+
+/* Get selected IPs */
 function getSelectedIPs() {
     return Array.from(
         document.querySelectorAll('#ipForm input[type="checkbox"]:checked')
     ).map(cb => cb.value);
 }
 
-/* ================= START SCAN ================= */
+/* Start Port Scan */
 function startScan() {
     const ips = getSelectedIPs();
-
-    if (ips.length === 0) {
-        document.getElementById("ports").innerText =
-            "No IPs selected for scanning";
+    if (!ips.length) {
+        document.getElementById("ports").innerText = "No IPs selected";
         return;
     }
 
-    document.getElementById("ports").innerText = "Starting scan…";
+    /* 🔒 Disable input, buttons, checkboxes */
+    document.getElementById("domainInput").disabled = true;
+    document.getElementById("enumBtn").disabled = true;
+    document.getElementById("portScanBtn").disabled = true;
+    disableIPCheckboxes();
+
+    document.getElementById("ports").innerText = "Starting port scan…";
+    document.getElementById("portLoader").style.display = "inline-block";
 
     fetch("/start-port-scan", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ips: ips })
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ ips })
     });
 
     poll();
 }
 
-/* ================= POLL RESULTS ================= */
+/* Poll scan status */
 function poll() {
     fetch("/port-status")
         .then(r => r.json())
@@ -159,12 +218,37 @@ function poll() {
 
             if (!data.done) {
                 setTimeout(poll, 3000);
+            } else {
+          
+                /* 🔓 Re-enable everything after scan */
+                    document.getElementById("domainInput").disabled = false;
+                    document.getElementById("enumBtn").disabled = false;
+                    document.getElementById("portScanBtn").disabled = false;
+                    enableIPCheckboxes();
+
+                    document.getElementById("portLoader").style.display = "none";
             }
         });
 }
-</script>
 
-{% endif %}
+/* Prevent POST resubmission on refresh */
+if (window.history.replaceState) {
+    window.history.replaceState(null, null, window.location.href);
+}
+
+function disableIPCheckboxes() {
+    document
+        .querySelectorAll('#ipForm input[type="checkbox"]')
+        .forEach(cb => cb.disabled = true);
+}
+
+function enableIPCheckboxes() {
+    document
+        .querySelectorAll('#ipForm input[type="checkbox"]')
+        .forEach(cb => cb.disabled = false);
+} 
+
+</script>
 
 </body>
 </html>

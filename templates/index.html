@@ -1,365 +1,221 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
-
-    <title>DNS and Port Scanner</title>
-
-<style>
-    :root {
-        --bg-page:#f4f6f8;
-        --bg-panel:#ffffff;
-        --border:#e5e7eb;
-        --primary:#2563eb;
-        --success:#16a34a;
-        --danger:#dc2626;
-        --text-main:#0f172a;
-        --text-muted:#6b7280;
-    }
-
-    body {
-        margin:0;
-        min-height:100vh;
-        background:var(--bg-page);
-        color:var(--text-main);
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-        padding:24px;
-    }
-
-    /* ===== PAGE WRAP FEEL ===== */
-    body::before {
-        content:"";
-        position:fixed;
-        inset:0;
-        background:var(--bg-page);
-        z-index:-1;
-    }
-
-    h2 {
-        text-align:center;
-        font-size:22px;
-        margin-bottom:18px;
-        color:var(--text-main);
-    }
-
-    h3 {
-        margin-top:32px;
-        font-size:14px;
-        font-weight:600;
-        color:#1f2937;
-        display:flex;
-        align-items:center;
-        gap:8px;
-        padding-bottom:6px;
-        border-bottom:1px solid var(--border);
-    }
-
-    /* ===== TOP FORM ===== */
-    .top-center {
-        max-width:1200px;
-        margin:0 auto 30px auto;
-        display:flex;
-        flex-direction:column;
-        align-items:center;
-        gap:16px;
-    }
-
-    .top-center form {
-        display:flex;
-        gap:10px;
-        flex-wrap:wrap;
-        background:var(--bg-panel);
-        padding:16px;
-        border-radius:8px;
-        border:1px solid var(--border);
-    }
-
-    input {
-        padding:9px 12px;
-        border-radius:6px;
-        border:1px solid var(--border);
-        background:#ffffff;
-        color:var(--text-main);
-        font-size:13px;
-        /* min-width:240px; */
-        outline:none;
-    }
-
-    input::placeholder {
-        color:#9ca3af;
-    }
-
-    /* ===== BUTTONS ===== */
-    button {
-        padding:9px 16px;
-        border-radius:6px;
-        border:1px solid transparent;
-        font-size:13px;
-        font-weight:600;
-        cursor:pointer;
-        background:var(--success);
-        color:#ffffff;
-    }
-
-    button[type="button"] {
-        background:var(--danger);
-    }
-
-    button:disabled {
-        background:#9ca3af;
-        cursor:not-allowed;
-    }
-
-    /* ===== CONTENT AREA ===== */
-    h3,
-    .box,
-    #portScanBtn {
-        max-width:1200px;
-        margin-left:auto;
-        margin-right:auto;
-    }
-
-    .box {
-        background:var(--bg-panel);
-        border:1px solid var(--border);
-        border-radius:8px;
-        padding:14px;
-        margin-top:10px;
-        max-height:280px;
-        overflow:auto;
-        font-size:12px;
-    }
-
-    pre {
-        margin:0;
-        white-space:pre-wrap;
-        line-height:1.45;
-        font-family: Consolas, Monaco, monospace;
-        color:#111827;
-    }
-
-    strong {
-        font-weight:600;
-        color:#111827;
-    }
-
-    label {
-        display:flex;
-        align-items:center;
-        gap:8px;
-        font-size:12px;
-        padding:4px 0;
-        cursor:pointer;
-    }
-
-    input[type="checkbox"] {
-        accent-color:var(--primary);
-    }
-
-    .muted {
-        color:var(--text-muted);
-        font-size:12px;
-    }
-
-    /* ===== PORT SCAN BUTTON ===== */
-    #portScanBtn {
-        display:block;
-        margin:32px auto 10px auto;
-    }
-
-    #ports {
-        color:#1d4ed8;
-        font-weight:500;
-    }
-
-    /* ===== LOADER ===== */
-    .loader {
-        width:12px;
-        height:12px;
-        border:2px solid #d1d5db;
-        border-top:2px solid var(--primary);
-        border-radius:50%;
-        animation:spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-        0% { transform:rotate(0deg); }
-        100% { transform:rotate(360deg); }
-    }
-
-    /* ===== SCROLLBAR ===== */
-    .box::-webkit-scrollbar {
-        width:6px;
-    }
-
-    .box::-webkit-scrollbar-thumb {
-        background:#cbd5e1;
-        border-radius:4px;
-    }
-
-    .box::-webkit-scrollbar-track {
-        background:#f9fafb;
-    }
-
-    /* ===== MOBILE ===== */
-    @media (max-width:600px) {
-        input {
-            min-width:100%;
+    <title>Recon Scanner</title>
+    <style>
+        body {
+            background:#020617;
+            color:#e5e7eb;
+            font-family:Arial;
+            padding:40px;
         }
-        .top-center form {
-            width:100%;
+        h2, h3 { color:#38bdf8; }
+        input, button {
+            padding:10px;
+            border-radius:6px;
+            border:none;
         }
-    }
-</style>
+        button {
+            background:#22c55e;
+            cursor:pointer;
+            margin-top:10px;
+        }
+        .panel {
+            background:#020617;
+            border:1px solid #1e293b;
+            padding:15px;
+            margin-top:15px;
+            border-radius:8px;
+            max-height:300px;
+            overflow:auto;
+        }
+        .ip-row {
+            display:flex;
+            align-items:center;
+            gap:10px;
+            margin:5px 0;
+        }
+        pre { margin:0; white-space:pre-wrap; }
+
+        .loader {
+            display: none;
+            margin-top: 15px;
+            color: #38bdf8;
+            font-weight: bold;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 3px solid #1e293b;
+            border-top: 3px solid #38bdf8;
+            border-radius: 50%;
+            display: inline-block;
+            animation: spin 1s linear infinite;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        button:disabled {
+            background: #475569;
+            cursor: not-allowed;
+        }
+
+        button.locked {
+            background: #475569 !important;
+            cursor: not-allowed !important;
+            pointer-events: none !important;
+            opacity: 0.7;
+        }
+
+        
+        
+        
+        
+        
+        
 
 
+    </style>
 </head>
-
 <body>
 
-<div class="top-center">
-    <h2> BUG FREE - RECON SCANNER </h2>
+<h2>BUG FREE - Recon Scanner</h2>
 
-    <form method="POST" onsubmit="disableEnumBtn()">
-        <input id="domainInput" name="domain" value="{{ domain }}" placeholder="example.com" required>
-        <button id="enumBtn" type="submit">Enumerate DNS</button>
-        <button type="button" onclick="stopAll()">Stop</button>
-    </form>
-</div>
-
-<h3>
-    All Subdomains
-    {% if not all_subs %}<span class="loader"></span>{% endif %}
-</h3>
-
-<div class="box">
-{% if all_subs %}
-<pre>{% for s in all_subs %}{{ s }}
-{% endfor %}</pre>
-{% else %}
-<div class="muted">Waiting for subdomain enumeration…</div>
-{% endif %}
-</div>
-
-<h3>
-    Active Subdomains
-    {% if not active_subs %}<span class="loader"></span>{% endif %}
-</h3>
-
-<div class="box">
-{% if active_subs %}
-<pre>{% for s in active_subs %}{{ s }}
-{% endfor %}</pre>
-{% else %}
-<div class="muted">Resolving DNS records…</div>
-{% endif %}
-</div>
-
-<h3>
-    IP Addresses (Select IP to Scan)
-    {% if not ip_map %}<span class="loader"></span>{% endif %}
-</h3>
-
-<div class="box">
-{% if ip_map %}
-<form id="ipForm">
-{% for sub, ips in ip_map.items() %}
-<strong>{{ sub }}</strong><br>
-{% for ip in ips %}
-<label>
-    <input type="checkbox" value="{{ ip }}" checked>
-    {{ ip }}
-</label><br>
-{% endfor %}
-<br>
-{% endfor %}
+<form method="POST" onsubmit="return handleEnumerateSubmit()">
+    <input
+            type="text"
+            id="domainInput"
+            name="domain"
+            placeholder="example.com"
+            value="{{ domain }}"
+            required
+            {% if scan_running %}disabled{% endif %}
+        >
+    <button
+        type="submit"
+        id="enumBtn"
+        {% if scan_running %}disabled class="locked"{% endif %}
+    >
+        <span id="enumText">
+            {% if scan_running %}Scan in progress…{% else %}Enumerate{% endif %}
+        </span>
+    </button>
 </form>
-{% else %}
-<div class="muted">Extracting IP addresses…</div>
+
+
+{% if all_subdomains %}
+<h3>All Subdomains</h3>
+<div class="panel"><pre>{% for s in all_subdomains %}{{ s }}
+{% endfor %}</pre></div>
 {% endif %}
+
+{% if active_subdomains %}
+<h3>Active Subdomains</h3>
+<div class="panel"><pre>{% for s in active_subdomains %}{{ s }}
+{% endfor %}</pre></div>
+{% endif %}
+
+{% if ip_list %}
+<h3>Select IPs for Port Scan</h3>
+<div class="panel" id="ipPanel">
+{% for ip in ip_list %}
+<div class="ip-row">
+    <input type="checkbox" class="ip-checkbox" value="{{ ip }}">
+    {{ ip }}
+</div>
+{% endfor %}
 </div>
 
-<button id="portScanBtn" onclick="startScan()">Port Scan</button>
+<button id="scanBtn" onclick="startScan()">Start Port Scan</button>
 
-<h3>
-    Open Ports
-    <span id="portLoader" class="loader" style="display:none;"></span>
-</h3>
+<div class="loader" id="loader">
+    <span class="spinner"></span> Scanning ports… please wait
+</div>
 
-<div class="box">
+<h3>Open Ports</h3>
+<div class="panel">
     <pre id="ports">Waiting…</pre>
 </div>
 
+{% endif %}
+
 <script>
-/* ===== FLAGS (ADDED) ===== */
-let enumRunning = false;
-let portRunning = false;
-let stopPolling = false;
+let portScanRunning = false;
 
-/* Disable Enumerate button */
-function disableEnumBtn() {
-    enumRunning = true;
-    document.getElementById("enumBtn").disabled = true;
-
-    /* ✅ RESET stopped text when new enumeration starts */
-    document.querySelectorAll('.muted')
-        .forEach(m => {
-            if (m.innerText === 'Stopped by user') {
-                m.innerText = 'Waiting for subdomain enumeration…';
-            }
-        });
-
-    /* Show loaders again */
-    document.querySelectorAll('.loader')
-        .forEach(l => l.style.display = 'inline-block');
+function handleEnumerateSubmit() {
+    if (portScanRunning) {
+        alert("Port scan is in progress. Please wait until it completes.");
+        return false;
+    }
+    return true;
 }
 
-/* Get selected IPs */
-function getSelectedIPs() {
-    return Array.from(
-        document.querySelectorAll('#ipForm input[type="checkbox"]:checked')
-    ).map(cb => cb.value);
+function setPortScanUIState(isScanning) {
+    const enumBtn = document.getElementById("enumBtn");
+    const enumText = document.getElementById("enumText");
+    const scanBtn = document.getElementById("scanBtn");
+    const domainInput = document.getElementById("domainInput");
+
+    portScanRunning = isScanning;
+
+    // Enumerate button
+    enumBtn.disabled = isScanning;
+    enumBtn.classList.toggle("locked", isScanning);
+    enumText.innerText = isScanning ? "Scan in progress…" : "Enumerate";
+
+    // Domain input
+    domainInput.disabled = isScanning;
+
+    // Scan button
+    scanBtn.disabled = isScanning;
+    scanBtn.classList.toggle("locked", isScanning);
+
+    // IP checkboxes
+    document.querySelectorAll(".ip-checkbox").forEach(cb => {
+        cb.disabled = isScanning;
+    });
+
+    // Loader
+    document.getElementById("loader").style.display =
+        isScanning ? "block" : "none";
 }
 
-/* Start Port Scan */
 function startScan() {
-    const ips = getSelectedIPs();
-    if (!ips.length) {
-        document.getElementById("ports").innerText = "No IPs selected";
+    const ips = Array.from(
+        document.querySelectorAll(".ip-checkbox:checked")
+    ).map(cb => cb.value);
+
+    if (ips.length === 0) {
+        alert("Select at least one IP");
         return;
     }
 
-    portRunning = true;
-    stopPolling = false;
-
-    document.getElementById("domainInput").disabled = true;
-    document.getElementById("enumBtn").disabled = true;
-    document.getElementById("portScanBtn").disabled = true;
-    disableIPCheckboxes();
-
-    document.getElementById("ports").innerText = "Starting port scan…";
-    document.getElementById("portLoader").style.display = "inline-block";
+    setPortScanUIState(true);
+    document.getElementById("ports").innerText = "Scanning…";
 
     fetch("/start-port-scan", {
         method: "POST",
-        headers: {"Content-Type":"application/json"},
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ips })
     });
 
     poll();
 }
 
-/* Poll scan status */
 function poll() {
-    if (stopPolling) return;
-
     fetch("/port-status")
         .then(r => r.json())
         .then(data => {
             let out = "";
 
-            for (let ip in data.ports) {
-                const ports = data.ports[ip];
+            for (let ip in data.results) {
+                const ports = data.results[ip];
                 out += ip + " → " +
                     (ports.length ? ports.join(", ") : "No open ports") + "\n";
             }
@@ -367,74 +223,35 @@ function poll() {
             document.getElementById("ports").innerText =
                 out || (data.running ? "Scanning…" : "Done");
 
-            if (!data.done) {
-                setTimeout(poll, 3000);
+            if (data.done) {
+                setPortScanUIState(false);
             } else {
-                portRunning = false;
-
-                document.getElementById("domainInput").disabled = false;
-                document.getElementById("enumBtn").disabled = false;
-                document.getElementById("portScanBtn").disabled = false;
-                enableIPCheckboxes();
-                document.getElementById("portLoader").style.display = "none";
+                setTimeout(poll, 3000);
             }
+        })
+        .catch(() => {
+            setPortScanUIState(false);
+            document.getElementById("ports").innerText = "Port scan error";
         });
 }
 
-/* ===== SINGLE STOP BUTTON ===== */
-function stopAll() {
-     window.stop();
-    /* Stop enumeration UI */
-    if (enumRunning) {
-        enumRunning = false;
-        document.getElementById("domainInput").disabled = false;
-        document.getElementById("enumBtn").disabled = false;
-
-        document.querySelectorAll('.loader')
-            .forEach(l => l.style.display = 'none');
-
-        document.querySelectorAll('.muted')
-            .forEach(m => {
-                if (
-                    m.innerText.includes('Waiting') ||
-                    m.innerText.includes('Resolving')
-                ) {
-                    m.innerText = 'Stopped by user';
-                }
-            });
-    }
-
-    /* Stop port scan UI */
-    if (portRunning) {
-        stopPolling = true;
-        portRunning = false;
-
-        document.getElementById("ports").innerText = "Scan stopped by user";
-        document.getElementById("portLoader").style.display = "none";
-
-        document.getElementById("domainInput").disabled = false;
-        document.getElementById("enumBtn").disabled = false;
-        document.getElementById("portScanBtn").disabled = false;
-        enableIPCheckboxes();
-    }
-}
-
-/* Helpers */
-function disableIPCheckboxes() {
-    document.querySelectorAll('#ipForm input[type="checkbox"]')
-        .forEach(cb => cb.disabled = true);
-}
-
-function enableIPCheckboxes() {
-    document.querySelectorAll('#ipForm input[type="checkbox"]')
-        .forEach(cb => cb.disabled = false);
-}
-
-/* Prevent POST resubmission */
-if (window.history.replaceState) {
-    window.history.replaceState(null, null, window.location.href);
-}
+/* ✅ THIS MUST BE OUTSIDE */
+window.addEventListener("load", () => {
+    fetch("/port-status")
+        .then(r => r.json())
+        .then(data => {
+            if (data.running) {
+                setPortScanUIState(true);
+                document.getElementById("ports").innerText = "Scanning…";
+                poll();
+            }
+        })
+        .catch(() => {
+            console.warn("Could not restore port scan state");
+        });
+});
 </script>
+
 
 </body>
 </html>

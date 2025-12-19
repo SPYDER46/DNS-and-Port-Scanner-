@@ -1,91 +1,123 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Recon Scanner</title>
-    <style>
-        body {
-            background:#020617;
-            color:#e5e7eb;
-            font-family:Arial;
-            padding:40px;
-        }
-        h2, h3 { color:#38bdf8; }
-        input, button {
-            padding:10px;
-            border-radius:6px;
-            border:none;
-        }
-        button {
-            background:#22c55e;
-            cursor:pointer;
-            margin-top:10px;
-        }
-        .panel {
-            background:#020617;
-            border:1px solid #1e293b;
-            padding:15px;
-            margin-top:15px;
-            border-radius:8px;
-            max-height:300px;
-            overflow:auto;
-        }
-        .ip-row {
-            display:flex;
-            align-items:center;
-            gap:10px;
-            margin:5px 0;
-        }
-        pre { margin:0; white-space:pre-wrap; }
+    <title> DNS & Port Scanner </title>
+<style>
+    body {
+        background: #f1f5f9;
+        font-family: "Segoe UI", Arial, sans-serif;
+        margin: 0;
+        padding: 40px;
+        display: flex;
+        justify-content: center;
+    }
 
-        .loader {
-            display: none;
-            margin-top: 15px;
-            color: #38bdf8;
-            font-weight: bold;
-        }
+    .container {
+        background: #ffffff;
+        width: 100%;
+        max-width: 900px;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
 
-        .spinner {
-            width: 18px;
-            height: 18px;
-            border: 3px solid #1e293b;
-            border-top: 3px solid #38bdf8;
-            border-radius: 50%;
-            display: inline-block;
-            animation: spin 1s linear infinite;
-            vertical-align: middle;
-            margin-right: 10px;
-        }
+    h2 {
+        color: #0f172a;
+        margin-bottom: 5px;
+        text-align: center;
+    }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+    h3 {
+        color: #1e293b;
+        margin-top: 30px;
+        margin-bottom: 10px;
+    }
 
-        button:disabled {
-            background: #475569;
-            cursor: not-allowed;
-        }
+    input, button {
+        padding: 10px 12px;
+        border-radius: 6px;
+        border: 1px solid #cbd5f5;
+        font-size: 14px;
+    }
 
-        button.locked {
-            background: #475569 !important;
-            cursor: not-allowed !important;
-            pointer-events: none !important;
-            opacity: 0.7;
-        }
+    input:disabled {
+        background: #f8fafc;
+        color: #64748b;
+    }
 
-        
-        
-        
-        
-        
-        
+    button {
+        background: #2563eb;
+        color: #ffffff;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+    }
 
+    button:hover:not(:disabled) {
+        background: #1d4ed8;
+    }
 
-    </style>
+    button:disabled,
+    button.locked {
+        background: #94a3b8;
+        cursor: not-allowed;
+    }
+
+    form {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .panel {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        padding: 15px;
+        border-radius: 8px;
+        max-height: 250px;
+        overflow: auto;
+        font-size: 14px;
+    }
+
+    .ip-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px 0;
+    }
+
+    .loader {
+        margin-top: 15px;
+        padding: 10px;
+        background: #eef2ff;
+        border: 1px solid #c7d2fe;
+        border-radius: 6px;
+        color: #1e3a8a;
+        font-weight: 500;
+        display: none;
+    }
+
+    pre {
+        margin: 0;
+        white-space: pre-wrap;
+    }
+
+    .center {
+        text-align: center;
+        margin-top: 15px;
+    }
+</style>
+
 </head>
 <body>
+<div class="container">
 
-<h2>BUG FREE - Recon Scanner</h2>
+<h2>BUG FREE – Recon Scanner</h2>
+<p class="center" style="color:#475569;">
+    Enumerate subdomains, identify active hosts, and scan IPs for open ports.
+</p>
+
 
 <form method="POST" onsubmit="return handleEnumerateSubmit()">
     <input
@@ -132,7 +164,10 @@
 {% endfor %}
 </div>
 
-<button id="scanBtn" onclick="startScan()">Start Port Scan</button>
+<div class="center" style="margin-top: 20px;">
+    <button id="scanBtn" onclick="startScan()"> Port Scan </button>
+</div>
+
 
 <div class="loader" id="loader">
     <span class="spinner"></span> Scanning ports… please wait
@@ -235,7 +270,7 @@ function poll() {
         });
 }
 
-/* ✅ THIS MUST BE OUTSIDE */
+/* THIS MUST BE OUTSIDE */
 window.addEventListener("load", () => {
     fetch("/port-status")
         .then(r => r.json())
@@ -252,6 +287,7 @@ window.addEventListener("load", () => {
 });
 </script>
 
+</div>
 
 </body>
 </html>

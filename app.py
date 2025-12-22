@@ -7,7 +7,8 @@ import re
 
 app = Flask(__name__)
 
-SUBFINDER_BIN = r"C:\Users\TESTING\go\bin\subfinder.exe"
+# SUBFINDER_BIN = r"C:\Users\TESTING\go\bin\subfinder.exe"
+SUBFINDER_BIN = "subfinder"
 
 # --------- GLOBAL PORT SCAN STATE ----------
 SCAN_STATE = {

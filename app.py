@@ -93,27 +93,33 @@ def background_port_scan(ips):
 def index():
     domain = ""
     all_subdomains = []
-    active_subdomains = []
+    active_hosts = []
     ip_list = set()
 
     if request.method == "POST":
-        domain = request.form.get("domain")
+        domain = request.form.get("domain", "").strip()
         log(f"Domain submitted: {domain}")
 
-        all_subdomains = run_subfinder(domain)
+        if domain:
+            # 1️⃣ Run subfinder
+            all_subdomains = run_subfinder(domain)
 
-        for sub in all_subdomains:
-            ips = get_ips(sub)
-            if ips:
-                active_subdomains.append(sub)
-                for ip in ips:
-                    ip_list.add(ip)
+            # 2️⃣ Resolve IPs and bind domain → IP
+            for sub in all_subdomains:
+                ips = get_ips(sub)
+                if ips:
+                    active_hosts.append({
+                        "domain": sub,
+                        "ips": ips
+                    })
+                    for ip in ips:
+                        ip_list.add(ip)
 
     return render_template(
         "index.html",
         domain=domain,
         all_subdomains=all_subdomains,
-        active_subdomains=active_subdomains,
+        active_hosts=active_hosts,
         ip_list=sorted(ip_list),
         scan_running=SCAN_STATE["running"]
     )

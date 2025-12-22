@@ -147,11 +147,20 @@
 {% endfor %}</pre></div>
 {% endif %}
 
-{% if active_subdomains %}
-<h3>Active Subdomains</h3>
-<div class="panel"><pre>{% for s in active_subdomains %}{{ s }}
-{% endfor %}</pre></div>
+{% if active_hosts %}
+<h3>Active Subdomains (with IP)</h3>
+<div class="panel">
+{% for host in active_hosts %}
+    <div class="ip-row">
+        <strong>{{ host.domain }}</strong>
+        <span style="color:#64748b;">
+            → {{ host.ips | join(", ") }}
+        </span>
+    </div>
+{% endfor %}
+</div>
 {% endif %}
+
 
 {% if ip_list %}
 <h3>Select IPs for Port Scan</h3>
